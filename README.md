@@ -16,6 +16,7 @@ By the default both the websocket server and REST API server listens on port 888
 This is very simple and stupid chat server without any persistence or authentication. Do not use in any real environment.
 
 The server has two parts:
+
 * websocket server
 * REST API
 
@@ -33,6 +34,7 @@ Server will send some updates like when new user joins or leaves. Server message
 #### REST API ####
 
 The server exposes two REST API calls:
+
 * GET /users - get list of all users and their online/offline status
 * GET /history - get chat history
 
