@@ -36,9 +36,9 @@ wssServer.on('connection', function(ws) {
     });
     ws.on('close', function(code, message) {
         var user = ws.user;
-        user.ws = null;
+        user.online = false;
         util.log(user.nick + " dropped out.");
-        chatProtocol.broadcast("server", user.nick + " dropped out.");
+        chatProtocol.broadcast("_server", user.nick + " dropped out.");
     });
 });
 wssServer.on('error', function(err) {

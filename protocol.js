@@ -14,24 +14,33 @@ exports = module.exports = function(wss, users, chathistory) {
         handleCommand: function(ws, msg) {
             var commandAndParmas = msg.split(' ', 2);
             if(commandAndParmas.length >= 2 && commandAndParmas[0].toLowerCase() === '/nick') {
+                var nick = commandAndParmas[1].trim();
                 //check if nick is in use
-                var user = _users.getUser(commandAndParmas[1]);
-                if(user && user.ws) { //currently online, won't accept
-                    ws.send(JSON.stringify({from: "server", error: "Nick in use"}));
+                var user = _users.getUser(nick);
+                if(user && user.online) { //currently online, won't accept
+                    ws.send(JSON.stringify({from: "_server", error: "Nick in use"}));
+                    return false;
+                }                
+                if(nick[0] === '_') { //reserver nicks starting with '_' to server use
+                    ws.send(JSON.stringify({from: "_server", error: "Nick cannot start with the underscore"}));
                     return false;
                 }
                 //set or create user
-                var msg;               
-                if(ws.user) {
+                var retMsg;               
+                if(ws.user) { 
                     var oldNick = ws.user.nick;
-                    _users.changeNick(oldNick, commandAndParmas[1]);
-                    msg =  oldNick + " is now known as " + ws.user.nick;
+                    _users.changeNick(oldNick, nick);
+                    retMsg =  oldNick + " is now known as " + ws.user.nick;
                 } else {
-                    ws.user = _users.createUser(commandAndParmas[1]);
-                    ws.user.ws = ws;
-                    msg = "New user: " + ws.user.nick + " joined.";                    
+                    if(!user) {
+                        ws.user = _users.createUser(nick);
+                    } else {
+                        ws.user = user;
+                    }
+                    ws.user.online = true;
+                    retMsg = "New user: " + ws.user.nick + " joined.";
                 }
-                this.broadcast("server", msg)              
+                this.broadcast("_server", retMsg)              
             }    
         },
         broadcast: function(from, msg) {

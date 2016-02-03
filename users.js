@@ -2,7 +2,7 @@ var _ = require('lodash');
 
 function User(nick) {
     this.nick = nick;
-    this.ws = null;
+    this.online = false;
 }
 
 exports = module.exports = function() {
@@ -27,7 +27,7 @@ exports = module.exports = function() {
         /** Changes user nickname but be carefull, if newnick is alredy in use, this takes it over */
         changeNick: function(oldNick, newNick) {
             var user = this.getUser(oldNick);
-            if(user) {
+            if(user && !user.online) {
                 user.nick = newNick;
                 delete _users[oldNick];
                 _users[newNick] = user;
