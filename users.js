@@ -21,7 +21,7 @@ exports = module.exports = function() {
         },
         getAll: function() {
             return _.map(_users, function(user) {
-                return {nick: user.nick, online: user.ws ? true : false};
+                return {nick: user.nick, online: user.online};
             });
         },
         /** Changes user nickname but be carefull, if newnick is alredy in use, this takes it over */
