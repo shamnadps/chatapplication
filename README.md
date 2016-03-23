@@ -39,3 +39,7 @@ The server exposes two REST API calls:
 * GET /history - get chat history
 
 Both calls return JSON objects in form: `{errors: null, data: returned data}`
+
+#### Known Bugs ####
+
+* If user disconnects before taking the nick, the server dies.
