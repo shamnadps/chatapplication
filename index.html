@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>WebSocket Chat</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="http://code.jquery.com/jquery-3.0.0.slim.min.js"></script>
+</head>
+
+<body>
+
+	<div id="signedusers">
+		<div id="title">
+			Leadin Chat Members
+		</div>
+		<hr>
+		<div id="membernames">
+		</div>
+	</div>
+	<form>
+		<div id="name-div">
+			<input id="name" name="name" autocomplete="off" autofocus placeholder="Enter your nickname" />
+			<input type="button" id="getnick" value="Set Username" onClick="getNick()"/>
+		</div>
+		<div id="welcome"></div>
+		<ul id="messages"></ul>
+		<div id="input-div">
+			<input id="message" name="message" autocomplete="off" placeholder="Type your message here" />
+			<input type="button" id="sendchat" value="Send" onclick="sendChat()"/>
+		</div>
+	</form>
+
+	<script>
+	$("#getnick").prop('disabled', true);
+	$("#sendchat").prop('disabled', true);
+	websocket = new WebSocket("ws://127.0.0.1:8888");
+
+	function getNick() {
+		name = $('#name').val() ? $('#name').val() : 'Anonymous';
+		$('#name-div').hide();
+		$('#welcome').text('Hello ' + name);
+		websocket.send("/nick "+name);
+		$("#sendchat").prop('disabled', false);
+	}
+
+	function sendChat() {
+		name = $('#name').val() ? $('#name').val() : 'Anonymous';
+		message = $('#message').val();
+		websocket.send(message);
+		$('#message').focus();
+		$('#message').val('');
+	}
+
+	websocket.onmessage = function(evt) {
+		$('#messages').append($('<li>').html(evt.data));
+		$("#getnick").prop('disabled', false);
+	};
+
+	websocket.onerror = function(evt) {
+		$('#messages').append($('<li>').text('ERROR: ' + "Server is down! Please start the server."));
+	};
+	</script>
+</body>
+
+</html>

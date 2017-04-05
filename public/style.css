@@ -1,0 +1,92 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font: 13px Helvetica, Arial;
+    height:100%;
+}
+
+form {
+    width:70%;
+    height:100%;
+}
+
+#signedusers {
+    width:30%;
+    height:100vh;
+    float:right;
+    text-align:center;
+    padding:10px;
+    background: #eee;
+    border-left: 1px double #AAA;
+}
+
+#title {
+    padding:10px;
+}
+
+#name {
+    border: 0;
+    padding: 10px;
+    width: 80%;
+    margin-right: .5%;
+}
+
+#message {
+    border: 0;
+    padding: 10px;
+    width: 80%;
+    margin-right: .5%;
+}
+
+#getnick {
+    width: 15%;
+    background: #eee;
+    border: none;
+    padding: 10px;
+}
+
+#sendchat {
+    width: 15%;
+    background: #eee;
+    border: none;
+    padding: 10px;
+}
+
+form button {
+    width: 9%;
+    background: rgb(130, 224, 255);
+    border: none;
+    padding: 10px;
+}
+
+#name-div, #welcome {
+    background: #AAA;
+    padding: 10px;
+    width: 100%;
+}
+
+#input-div {
+    background: #AAA;
+    padding: 6px;
+    position: fixed;
+    bottom: 0;
+    width: 70%;
+}
+
+#messages {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#messages li {
+    padding: 5px 10px;
+}
+
+#messages li:nth-child(odd) {
+    background: #eee;
+}
