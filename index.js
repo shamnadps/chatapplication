@@ -1,3 +1,4 @@
+var dateFormat = require('dateformat');
 var express = require('express'),
     app = express(),
     http = require('http').Server(app),
@@ -7,6 +8,7 @@ var express = require('express'),
     });
 
 app.use(express.static('public'));
+app.use(express.static('images'));
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');

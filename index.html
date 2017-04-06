@@ -4,7 +4,7 @@
 <head>
     <title>WebSocket Chat</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="http://code.jquery.com/jquery-3.0.0.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 </head>
 
 <body>
@@ -15,7 +15,17 @@
 		</div>
 		<hr>
 		<div id="membernames">
+			<ul id="membernamelist"></ul>
 		</div>
+		<hr>
+		<div id="notificationbar">
+			Notifications
+		</div>
+		<hr>
+		<div id="servermessages">
+			<ul id="messagesfromserver"></ul>
+		</div>
+		<hr>
 	</div>
 	<form>
 		<div id="name-div">
@@ -38,9 +48,10 @@
 	function getNick() {
 		name = $('#name').val() ? $('#name').val() : 'Anonymous';
 		$('#name-div').hide();
-		$('#welcome').text('Hello ' + name);
+		$('#welcome').text('Welcome ' + name);
 		websocket.send("/nick "+name);
 		$("#sendchat").prop('disabled', false);
+		$('#messages').html($('<li>').html("Successfully Registerd Nick name, Start Chatting now!."));
 	}
 
 	function sendChat() {
@@ -49,16 +60,132 @@
 		websocket.send(message);
 		$('#message').focus();
 		$('#message').val('');
+		$('#messages').append($('<li>').html('<span id="username">You: </span>'+message));
 	}
-
+	var firstmessage = 0;
 	websocket.onmessage = function(evt) {
-		$('#messages').append($('<li>').html(evt.data));
+		if( firstmessage == 1) {
+			var json = JSON.parse(evt.data);
+			if(json.error) {
+				handleErrorMessage(json.error);
+				return;
+			}
+			if(json.from == '_server') {
+				$('#messagesfromserver').append($('<li>').html(json.message));
+				var getusersurl = "http://localhost:8888/users";
+				jQuery.ajax({
+					url: getusersurl,
+					type: "GET",
+					dataType: "text",
+					success: function(resultData) {
+						var jsonobj = $.parseJSON(resultData);
+						var jsonConvertedData = JSON.stringify(jsonobj.data);
+						processMemberData(jsonConvertedData);
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+					},
+				});
+			} else {
+				$('#messages').append($('<li>').html('<span id="username">'+json.from+": </span>"+json.message));
+			}
+		} else {
+			firstmessage = 1;
+			$('#messages').append($('<li>').html("Register your nickname."));
+		}
 		$("#getnick").prop('disabled', false);
 	};
 
 	websocket.onerror = function(evt) {
-		$('#messages').append($('<li>').text('ERROR: ' + "Server is down! Please start the server."));
+		$('#messages').append($('<li>').text("Connection Lost! Please start the server."));
 	};
+
+	function handleErrorMessage(message) {
+		if(message == 'Nick in use') {
+			$('#messages').html($('<li>').html("Nickname already in use. Please try a different one!"));
+		} else if(message == 'Nick cannot start with the underscore'){
+			$('#messages').html($('<li>').html("Nick cannot start with the underscore. Please try a different one!"));
+		}
+		$('#name-div').show();
+		$('#welcome').text(' ');
+		$("#sendchat").prop('disabled', true);
+	}
+
+	function processMemberData(data) {
+		data = $.parseJSON(data);
+		$('#membernamelist').empty();
+		name = $('#name').val() ? $('#name').val() : 'Anonymous';
+		$.each(data, function(i, item) {
+			var row = JSON.stringify(item);
+			if(name != item.nick) {
+				if(item.online) {
+					$('#membernamelist').prepend($('<li>').html(getOnlineStatus(item.online) + getName(item.nick) + getChatHistory(item.nick)));
+				} else {
+					$('#membernamelist').append($('<li>').html(getOnlineStatus(item.online) + getName(item.nick) + getChatHistory(item.nick)));
+				}
+			}
+		});
+	}
+
+	function getOnlineStatus(online) {
+		return '<img src="'+checkStatus(online)+'" height="25" width="25">';
+	}
+
+	function getName(name) {
+		return '<span style="margin-left:4px;margin-bottom:10px;">' + name +' </span>';
+	}
+
+	function getChatHistory(name) {
+		return '<img style="margin-right:10px;float:right;cursor: pointer;" onclick="showChatHistory(\'' + name + '\')" title="Chat History" src="chathistory.png" height="21" width="21">'
+	}
+
+	function checkStatus(status) {
+		if(status) {
+			return 'online.png';
+		} else {
+			return 'offline.png';
+		}
+	}
+
+	function showChatHistory(names) {
+		var getusersurl = "http://localhost:8888/history";
+		jQuery.ajax({
+			url: getusersurl,
+			type: "GET",
+			dataType: "text",
+			success: function(resultData) {
+				var jsonobj = $.parseJSON(resultData);
+				var jsonConvertedData = JSON.stringify(jsonobj.data);
+				processHistoryData(jsonConvertedData,names);
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+			},
+		});
+	}
+
+	function processHistoryData(data,name) {
+		data = $.parseJSON(data);
+		$('#messages').empty();
+		var counter = 0;
+		$.each(data, function(i, item) {
+			var row = JSON.stringify(item);
+			if(name == item.from) {
+				counter++;
+				if(counter == 1) {
+					$('#messages').prepend($('<li>').html('Showing chat history with '+name));
+				}
+				var timestamp = item.timestamp;
+				var formatTime = new Date(timestamp);
+				$('#messages').append($('<li>').html('<span id="username">'+item.from+': </span> '+item.msg+' '+formatTimeString(formatTime)));
+			}
+		});
+		if(counter == 0) {
+			$('#messages').append($('<li>').html("No messages from user "+name));
+		}
+	}
+
+	function formatTimeString(formatTime) {
+		return '<span style="float:right;margin-right:10px;">'+formatTime.getHours()+":"+formatTime.getMinutes()+":"+formatTime.getSeconds()+'</span>';
+	}
 	</script>
 </body>
 
