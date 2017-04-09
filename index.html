@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta content='width=device-width, height=device-height,initial-scale=0, maximum-scale=0, user-scalable=0' name='viewport' />
     <!--[if IE]>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <![endif]-->
@@ -18,16 +18,37 @@
 
 </head>
 <body>
-    <div class="container">
+    <div class="container" >
         <div class="row pad-top pad-bottom">
 
 
             <div class=" col-lg-6 col-md-6 col-sm-6">
                 <div class="chat-box-div">
                     <div class="chat-box-head">
+                      <div id="titletext">
                         LEADIN GROUP CHAT
+                      </div>
                     </div>
-					<div>
+
+					      <div>
+                    <table id="membertable">
+                      <tr>
+                        <td id="onlinemembercoloumn" class="groupdataitem" onclick="showGroupChat()">
+                          <img id="userimage" src="group.png"/><br>
+                          <span id="membername">Group Chat</span>
+                        </td>
+                        <td>
+                          <div id="memberdata">
+                            <table>
+                              <tr id="onlinememberrow">
+                              </tr>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+
                         <div class="input-group" id="nickbox">
                             <input type="text" id="name" class="form-control" placeholder="Enter Nickname Here...">
                             <span class="input-group-btn">
@@ -35,14 +56,13 @@
                             </span>
                         </div>
 
-						<div class="panel-body chat-box-new">
-							<div id="welcome"></div>
 
-							<div id="messages"></div>
-						</div>
+							<div id="messages" class="panel-body chat-box-new"></div>
 
                     </div>
                     <div id="chatmessages" class="panel-body chat-box-main">
+                    </div>
+                    <div id="chathistory" class="panel-body chat-box-main">
                     </div>
                     <div class="chat-box-footer">
                         <div class="input-group">
@@ -51,32 +71,6 @@
 								<input type="button" class="btn btn-info" id="sendchat" onclick="sendChat()" value="SEND"/>
                             </span>
                         </div>
-                    </div>
-
-                </div>
-
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-3">
-                <div class="chat-box-online-div">
-                    <div class="chat-box-online-head">
-                        LEADIN CHAT MEMBERS
-                    </div>
-                    <div id="membersonline" class="panel-body chat-box-online">
-                    </div>
-
-                </div>
-
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-3">
-                <div class="chat-box-new-div">
-                    <div class="chat-box-new-head">
-                        Notifications
-                    </div>
-                    <div class="panel-body chat-box-new">
-
-
-                        <div id="messagesfromserver">
-						</div>
                     </div>
 
                 </div>
@@ -91,23 +85,55 @@
 		<script>
 	$("#getnick").prop('disabled', true);
 	$("#sendchat").prop('disabled', true);
+	$("#name").prop('disabled', true);
+	$("#chat").prop('disabled', true);
+	$("#membertable").hide();
+	$('#chathistory').hide();
 	websocket = new WebSocket("ws://localhost:8888");
+	$('#messages').show();
 	$('#messages').html("Connecting to server.. Please wait.");
 
 	function sendNick() {
-		name = $('#name').val() ? $('#name').val() : 'Anonymous';
-		$('#nickbox').hide();
-		$('#welcome').text('Welcome ' + name);
-		websocket.send("/nick "+name);
-		$("#sendchat").prop('disabled', false);
-		$('#messages').html('<hr class="hr-clas-low" />Successfully Registerd Nick name, Start Chatting now!.');
+		name = $('#name').val();
+		if(name.trim().length > 0) {
+			$('#titletext').html("LEADIN GROUP CHAT - "+name);
+			$('#nickbox').hide();
+			websocket.send("/nick "+name);
+			$("#sendchat").prop('disabled', false);
+			$("#chat").prop('disabled', false);
+			$('#messages').html('');
+			$('#messages').hide();
+			$("#membertable").show();
+			$('#chat').focus();
+		} else {
+			$('#messages').html("Nickname cannot be blank value.");
+		}
+
+	}
+	
+	$("#name").keypress(function(event) {
+    if (event.which == 13 && !isMobile()) {
+        sendNick();
+     }
+	});
+	
+	$("#chat").keypress(function(event) {
+    if (event.which == 13 && !isMobile()) {
+        sendChat();
+     }
+	});
+
+	function isMobile() {
+		try{ document.createEvent("TouchEvent"); return true; }
+			catch(e){ return false; }
 	}
 
 	function sendChat() {
 
 		chat = $('#chat').val();
 		if(chat.trim().length > 0) {
-			name = $('#name').val() ? $('#name').val() : 'Anonymous';
+			name = $('#name').val();
+
 			websocket.send(chat);
 			$('#chat').focus();
 			$('#chat').val('');
@@ -121,28 +147,31 @@
 		var chatuser = '<div class="chat-box-name-left"><img src="user.png" alt="bootstrap Chat box user image" class="img-circle" /> -  '+name+'</div>';
         var hrline = '<hr class="hr-clas" />';
 		$('#chatmessages').append(chatmessage+chatuser+hrline);
-		$("#chatmessages").scrollTop($("#chatmessages")[0].scrollHeight);
-		$('#messages').html('');
+    $("#chatmessages").animate({
+      scrollTop: $("#chatmessages")[0].scrollHeight
+    }, 1500);
+    $('#messages').hide();
 	}
 
+  function showGroupChat() {
+    $('#chathistory').hide();
+    $('#chatmessages').show();
+    $("#chatmessages").animate({
+      scrollTop: $("#chatmessages")[0].scrollHeight
+    }, 1500);
+  }
 	function buildMemberlist(name,online) {
+    var tdtag = '<td id="onlinemembercoloumn" class="onlinemember" onclick="showChatHistory(\''+name+'\')">';
+    var tdtagoffline = '<td id="onlinemembercoloumn" class="offlinemember" onclick="showChatHistory(\''+name+'\')">';
+    var imageonline = '<img id="userimage" src="online.png"/><br>';
+    var imageoffline = '<img id="userimage" src="offline.png"/><br>';
+    var membername = '<span id="membername">'+name+'</span></td>';
 
-		if(online) {
-			status = 'online';
-		} else {
-			status = 'offline';
-		}
-		var username = '<div class="chat-box-online-left '+status+'"><img src="user.png" alt="user image" class="img-circle" /> -  '+name+'<br />';
-		var active = '(<small>Active</small>)';
-		var offline = '(<small>Offline</small>)';
-        var showhistory = ' <small> <a href="#" id="link'+name+'" onclick="showChatHistory(\''+name+'\')">Show History</a></small></div>';
-		var chatHistory = '<div id="chathistorymessages'+name+'" class="panel-body chat-box-main chat-history" style="display:none;"></div><hr class="hr-clas" />';
-
-		if(online) {
-			$('#membersonline').prepend(username+active+showhistory+chatHistory);
-		} else {
-			$('#membersonline').append(username+offline+showhistory+chatHistory);
-		}
+    if(online) {
+      $('#onlinememberrow').prepend(tdtag+imageonline+membername);
+    } else {
+      $('#onlinememberrow').append(tdtagoffline+imageoffline+membername);
+    }
 
 	}
 	var firstmessage = 0;
@@ -153,54 +182,65 @@
 				handleErrorMessage(json.error);
 				return;
 			}
+			name = $('#name').val();
 			if(json.from == '_server') {
-				$('#messagesfromserver').append(json.message+'<hr class="hr-clas-low" />');
-				var getusersurl = "http://localhost:8888/users";
-				jQuery.ajax({
-					url: getusersurl,
-					type: "GET",
-					dataType: "text",
-					success: function(resultData) {
-						var jsonobj = $.parseJSON(resultData);
-						var jsonConvertedData = JSON.stringify(jsonobj.data);
-						processMemberData(jsonConvertedData);
-					},
-					error : function(jqXHR, textStatus, errorThrown) {
-					},
-				});
+            $('#chatmessages').append('<div class="servermessages">'+json.message+'</div><hr class="hr-clas" />');
+            $("#chatmessages").scrollTop($("#chatmessages")[0].scrollHeight);
+				    var getusersurl = "http://localhost:8888/users";
+				    jQuery.ajax({
+					     url: getusersurl,
+					     type: "GET",
+					     dataType: "text",
+					     success: function(resultData) {
+						      var jsonobj = $.parseJSON(resultData);
+						      var jsonConvertedData = JSON.stringify(jsonobj.data);
+						      processMemberData(jsonConvertedData);
+					     },
+					     error : function(jqXHR, textStatus, errorThrown) {
+					     },
+				    });
 			} else {
 				buildChatItem(json.from,json.message);
 			}
 		} else {
 			firstmessage = 1;
+			$('#messages').show();
 			$('#messages').html("Register your nickname.");
+			$("#name").prop('disabled', false);
 		}
 		$("#getnick").prop('disabled', false);
 	};
 
 	websocket.onerror = function(evt) {
+    $('#messages').show();
 		$('#messages').html("Connection error! Please start the server.");
 	};
 
   websocket.onclose = function(evt) {
+    $('#messages').show();
     $('#messages').html("Connection closed! Please start the server.");
   };
 
 	function handleErrorMessage(message) {
 		if(message == 'Nick in use') {
+			$('#messages').show();
 			$('#messages').html("Nickname already in use. Please try a different one!");
 		} else if(message == 'Nick cannot start with the underscore'){
+			$('#messages').show();
 			$('#messages').html("Nick cannot start with the underscore. Please try a different one!");
 		}
 		$('#nickbox').show();
-		$('#welcome').text(' ');
 		$("#sendchat").prop('disabled', true);
+		$("#chat").prop('disabled', true);
+		$("#membertable").hide();
 	}
 
 	function processMemberData(data) {
 		data = $.parseJSON(data);
 		$('#membersonline').empty();
-		name = $('#name').val() ? $('#name').val() : 'Anonymous';
+    $('#onlinememberrow').empty();
+
+		name = $('#name').val();
 		$.each(data, function(i, item) {
 			var row = JSON.stringify(item);
 			if(name != item.nick) {
@@ -232,17 +272,17 @@
 	}
 
 	function processHistoryData(data,name) {
-
-		$('#chathistorymessages'+name).toggle();
+    $('#chathistory').show();
+    $('#chathistory').html('');
+    $('#chatmessages').hide();
 		data = $.parseJSON(data);
-		$('#chathistorymessages'+name).empty();
 		var counter = 0;
 		$.each(data, function(i, item) {
 			var row = JSON.stringify(item);
 			if(name == item.from) {
 				counter++;
 				if(counter == 1) {
-					$('#chathistorymessages'+name).prepend('<small>Showing chat history with '+name+'</small><hr>');
+          $('#chathistory').prepend('<small>Showing chat history with '+name+'</small><hr>');
 				}
 				var timestamp = item.timestamp;
 				var formatTime = new Date(timestamp);
@@ -250,15 +290,19 @@
 			}
 		});
 		if(counter == 0) {
-			$('#chathistorymessages'+name).html("No messages from user "+name);
+      $('#chathistory').html('<small>No messages from user '+name+'</small><hr>');
 		}
+    $("#chathistory").animate({
+      scrollTop: $("#chathistory")[0].scrollHeight
+    }, 1500);
+
 	}
 
 	function buildChatHistory(name,chat) {
 		var chatmessage = '<div class="chat-box-left">'+chat+'</div>';
 		var chatuser = '<div class="chat-box-name-left"><img src="user.png" alt="bootstrap Chat box user image" height="30" width="30" class="img-circle" /> -  '+name+'</div>';
-        var hrline = '<hr class="hr-clas-low" />';
-		$('#chathistorymessages'+name).append(chatmessage+chatuser+hrline);
+    var hrline = '<hr class="hr-clas-low" />';
+    $('#chathistory').append(chatmessage+chatuser+hrline);
 	}
 
 	function formatTimeString(formatTime) {

@@ -7,41 +7,62 @@ body {
    font-family:Verdana;
 }
 .pad-top {
-    padding-top:30px;
+    padding-top:5px;
 }
 .pad-bottom {
-     padding-bottom:30px;
+     padding-bottom:2px;
 }
 /*======================================
     CHAT BOX STYLES
 ======================================= */
 
 .hr-clas {
-    border-top: 1px solid #A12EB3;
+    border-top: 1px solid #347C17;
 }
 
 #chatmessages {
-	border-top: 1px solid #A12EB3;
+	border-top: 1px solid #347C17;
 }
 
 #nickbox {
 	padding:5px;
 }
+
+#titletext {
+  display:inline-block;
+}
+
+#settings {
+  display:inline-block;
+  text-align: right;
+  float:right;
+  color:#FFF;
+}
+
+a {
+    color: #FFF;
+}
+
+a:link{
+  color:#FFF;
+}
 .chat-box-main {
-    max-height:65vh;
+    height:65vh;
     overflow:auto;
 }
 .chat-box-div {
-    border:2px solid #A12EB3;
-    border-bottom:2px solid #A12EB3;
+
+    border:2px solid #347C17;
+    border-bottom:2px solid #347C17;
     margin-bottom:15px;
 }
 .chat-box-head {
     padding: 10px 15px;
-border-bottom: 2px solid #A12EB3;
-background-color: #B25AE5;
+border-bottom: 2px solid #347C17;
+background-color: #347C17;
 color: #fff;
 text-align: center;
+
 
 }
 
@@ -107,6 +128,13 @@ text-align: center;
     text-align:right;
 }
 
+.servermessages {
+    color: #354EA0;
+    margin-top: 10px;
+    margin-left: 20px;
+    text-align:right;
+}
+
 .chat-box-name-right img {
         max-width:40px;
         border: 2px solid #354EA0;
@@ -125,6 +153,7 @@ padding: 10px;
 }
 
 .chat-box-online {
+     min-height:70vh;
      max-height:80vh;
     overflow:auto;
 }
@@ -211,4 +240,69 @@ padding:10px;
 -webkit-border-radius: 15px;
 -moz-border-radius: 15px;
 border-radius: 15px;
+}
+
+#memberdata {
+  max-width:100%;
+  overflow:auto;
+  display:inline-block;
+  position:relative;
+}
+
+#onlinemembercoloumn{
+  text-align:center;
+  border-right: 1px solid #347C17;
+  cursor:pointer;
+  padding:5px;
+  width:90px;
+}
+
+#membertable {
+  width:100%;
+  table-layout:fixed;
+}
+
+.groupdataitem {
+  padding:5px;
+  width:80px;
+}
+.groupchatitem:hover {
+  background: #659EC7;
+}
+
+.onlinemember {
+  cursor:pointer;
+  width:90px;
+}
+.onlinemember:hover{
+background: #659EC7;
+}
+
+.offlinemember {
+  cursor:pointer;
+  width:90px;
+}
+.offlinemember:hover{
+background: #BCC6CC;
+}
+
+#onlinememberrow {
+  width:100%;
+  overflow:auto;
+}
+
+#chathistory {
+  border-top: 1px solid #347C17;
+}
+#membername {
+font-size:12px;
+text-align:center;
+width:90px;
+}
+
+#userimage {
+  text-align: center;
+  width:50px;
+  height:50px;
+
 }
