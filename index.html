@@ -29,8 +29,6 @@
                         LEADIN GROUP CHAT
                       </div>
                     </div>
-
-					      <div>
                     <table id="membertable">
                       <tr>
                         <td id="onlinemembercoloumn" class="groupdataitem" onclick="showGroupChat()">
@@ -57,9 +55,7 @@
                         </div>
 
 
-							<div id="messages" class="panel-body chat-box-new"></div>
-
-                    </div>
+					<div id="messages" class="panel-body chat-box-new"></div>
                     <div id="chatmessages" class="panel-body chat-box-main">
                     </div>
                     <div id="chathistory" class="panel-body chat-box-main">
@@ -143,14 +139,31 @@
 	}
 
 	function buildChatItem(name,chat) {
+		var time = new Date();
 		var chatmessage = '<div class="chat-box-left">'+chat+'</div>';
-		var chatuser = '<div class="chat-box-name-left"><img src="user.png" alt="bootstrap Chat box user image" class="img-circle" /> -  '+name+'</div>';
+		var chatuser = '<div class="chat-box-name-left"><img src="user.png" alt="bootstrap Chat box user image" class="img-circle" /> -  '+name+buildChatTime(time)+'</div>';
         var hrline = '<hr class="hr-clas" />';
 		$('#chatmessages').append(chatmessage+chatuser+hrline);
-    $("#chatmessages").animate({
-      scrollTop: $("#chatmessages")[0].scrollHeight
-    }, 1500);
-    $('#messages').hide();
+		$("#chatmessages").animate({
+		scrollTop: $("#chatmessages")[0].scrollHeight
+		}, 1500);
+		$('#messages').hide();
+	}
+
+	function buildChatTime(chatTime) {
+		var timevalue = '<span id="chat'+chatTime.getTime()+'" style="float:right;margin-right:10px;">moments ago</span>';
+		setInterval(function()
+		{
+		timevalue = updateChatTime(chatTime);
+			$('#chat'+chatTime.getTime()).html(timevalue);
+		} , 60000);
+		return timevalue;
+	}
+
+	function updateChatTime(chatTime) {
+		var currentTime = new Date();
+		var time = calculateTime('chat',currentTime, chatTime);
+		return time;
 	}
 
   function showGroupChat() {
@@ -207,6 +220,7 @@
 			$('#messages').show();
 			$('#messages').html("Register your nickname.");
 			$("#name").prop('disabled', false);
+			$('#name').focus();
 		}
 		$("#getnick").prop('disabled', false);
 	};
@@ -286,7 +300,8 @@
 				}
 				var timestamp = item.timestamp;
 				var formatTime = new Date(timestamp);
-				buildChatHistory(item.from,item.msg);
+				var currentTime = new Date();
+				buildChatHistory(item.from,item.msg, calculateTime('history',currentTime, formatTime), formatTime);
 			}
 		});
 		if(counter == 0) {
@@ -298,15 +313,44 @@
 
 	}
 
-	function buildChatHistory(name,chat) {
+	function calculateTime(type, currentTime, chatTime) {
+		var timevalue = ' seconds ago'
+		var timeDiff = ((currentTime-chatTime)/1000).toString();
+		if(timeDiff > 60) {
+			timevalue = ' minutes ago';
+			timeDiff = timeDiff /60;
+			if(timeDiff > 60) {
+				timevalue = ' hours ago';
+				timeDiff = timeDiff / 60;
+			}
+		}
+		return formatTimeString(type,chatTime,Math.round(timeDiff) + timevalue);
+	}
+	function buildChatHistory(name,chat,time, timestamp) {
 		var chatmessage = '<div class="chat-box-left">'+chat+'</div>';
-		var chatuser = '<div class="chat-box-name-left"><img src="user.png" alt="bootstrap Chat box user image" height="30" width="30" class="img-circle" /> -  '+name+'</div>';
+		var chatuser = '<div class="chat-box-name-left"><img src="user.png" alt="bootstrap Chat box user image" height="30" width="30" class="img-circle" /> -  '+name+buildChatHistoryTime(time,timestamp)+'</div>';
     var hrline = '<hr class="hr-clas-low" />';
     $('#chathistory').append(chatmessage+chatuser+hrline);
 	}
 
-	function formatTimeString(formatTime) {
-		return '<span style="float:right;margin-right:10px;">'+formatTime.getHours()+":"+formatTime.getMinutes()+":"+formatTime.getSeconds()+'</span>';
+	function buildChatHistoryTime(chatTime,timestamp) {
+		var timevalue = '<span id="history'+timestamp.getTime()+'" style="float:right;margin-right:10px;">'+chatTime+'</span>';
+		setInterval(function()
+		{
+		timevalue = updateChatHistoryTime(timestamp);
+			$('#history'+timestamp.getTime()).html(timevalue);
+		} , 60000);
+		return timevalue;
+	}
+
+	function updateChatHistoryTime(chatTime) {
+		var currentTime = new Date();
+		var time = calculateTime('history',currentTime, chatTime);
+		return time;
+	}
+
+	function formatTimeString(type,time,formatTime) {
+		return '<span id="'+type+time.getTime()+'" style="float:right;margin-right:10px;">'+formatTime+'</span>';
 	}
 	</script>
 
